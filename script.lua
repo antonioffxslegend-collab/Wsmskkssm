@@ -1,888 +1,171 @@
---[=[ env logged | by sergei.dev @ .gg/svgmV95Apm ]=]--
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local localPlayer = Players.LocalPlayer
 
-local Mouse = game.Players.LocalPlayer:GetMouse()
-local PlayerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-isfile("C4_Menu_Config.json")
-local C4_Final_Menu = PlayerGui:FindFirstChild("C4_Final_Menu")
-local v1 = PlayerGui.C4_Final_Menu:Destroy()
-local ScreenGui = Instance.new("ScreenGui", PlayerGui)
-ScreenGui.Name = "C4_Final_Menu"
-ScreenGui.ResetOnSpawn = false
-local UIScale = Instance.new("UIScale", ScreenGui)
-local PropertyChangedSignal = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize")
-local conn = PropertyChangedSignal:Connect(function(p1, p2)
-	UIScale.Scale = math.clamp(((math.min((workspace.CurrentCamera.ViewportSize.X / Vector2.new(1920, 1080).X), (workspace.CurrentCamera.ViewportSize.Y / Vector2.new(1920, 1080).Y)) * 1.35) * 1), 0.4, 3)
-end)
-UIScale.Scale = math.clamp(((math.min((workspace.CurrentCamera.ViewportSize.X / Vector2.new(1920, 1080).X), (workspace.CurrentCamera.ViewportSize.Y / Vector2.new(1920, 1080).Y)) * 1.35) * 1), 0.4, 3)
-local TextButton = Instance.new("TextButton", ScreenGui)
-TextButton.Size = UDim2.new(0, 260, 0, 22)
-TextButton.Position = UDim2.new(0, 10, 0, 10)
-TextButton.BackgroundTransparency = 1
-TextButton.Text = "Make by idcu(ilovebandngot) [Click to Unhide]"
-TextButton.Font = Enum.Font.SourceSansBold
-TextButton.TextSize = 12
-TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton.TextXAlignment = Enum.TextXAlignment.Left
-TextButton.Visible = false
-local TextButton2 = Instance.new("TextButton", ScreenGui)
-TextButton2.Size = UDim2.new(0, 150, 0, 45)
-TextButton2.Position = UDim2.new(0, 10, 0.5, -22)
-TextButton2.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-TextButton2.Text = ""
-TextButton2.AutoButtonColor = true
-local UICorner = Instance.new("UICorner", TextButton2)
-UICorner.CornerRadius = UDim.new(0, 8)
-local conn2 = TextButton2.InputBegan:Connect(function(p1, p2)
-	local conn3 = p1.Changed:Connect(function(p1, p2)
+-- الـ IDs الستة بالترتيب الصحيح
+local bombIds = {
+    "rbxassetid://72634649711269",
+    "rbxassetid://101785080415896",
+    "rbxassetid://87195137432081",
+    "rbxassetid://75764270519412",
+    "rbxassetid://133744095064808",
+    "rbxassetid://72795881681356"
+}
+
+local currentTexture = bombIds[1]
+local selectedButton = nil
+
+-- دالة قوية جداً لفرض الصورة على القنبلة أينما كانت
+local function modifyBomb(obj)
+	if not obj then return end
+	local name = obj.Name:lower()
+	
+	-- فحص مرن جداً يشمل أي أداة تحتوي على prank أو bomb
+	if not (name:find("bomb") or name:find("prank")) then return end
+	
+	for _, part in ipairs(obj:GetDescendants()) do
+		if part:IsA("MeshPart") then
+			part.TextureID = currentTexture
+		elseif part:IsA("BasePart") then
+			for _, sub in ipairs(part:GetChildren()) do
+				if sub:IsA("Decal") or sub:IsA("Texture") then
+					sub.Texture = currentTexture
+				elseif sub:IsA("SpecialMesh") then
+					sub.TextureId = currentTexture
+				end
+			end
+		end
+	end
+	if obj:IsA("MeshPart") then
+		obj.TextureID = currentTexture
+	end
+end
+
+-- مراقبة يد الحقيبة والشخصية بالأحداث (بدون لاج)
+local function onCharacterAdded(char)
+	char.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			task.spawn(function()
+				task.wait(0.05)
+				modifyBomb(child)
+			end)
+		end
 	end)
-end)
-local conn4 = TextButton2.InputChanged:Connect(function(p1, p2)
-end)
-local conn5 = UserInputService.InputChanged:Connect(function(p1, p2)
-end)
-local TextLabel = Instance.new("TextLabel", TextButton2)
-TextLabel.Size = UDim2.new(1, 0, 0.55, 0)
-TextLabel.Position = UDim2.new(0, 0, 0, 2)
-TextLabel.BackgroundTransparency = 1
-TextLabel.Font = Enum.Font.SourceSansBold
-TextLabel.TextSize = 16
-TextLabel.TextColor3 = Color3.fromRGB(20, 20, 20)
-local TextLabel2 = Instance.new("TextLabel", TextButton2)
-TextLabel2.Size = UDim2.new(1, 0, 0.45, 0)
-TextLabel2.Position = UDim2.new(0, 0, 0.5, -2)
-TextLabel2.BackgroundTransparency = 1
-TextLabel2.Font = Enum.Font.SourceSansItalic
-TextLabel2.TextSize = 10
-TextLabel2.TextColor3 = Color3.fromRGB(40, 40, 40)
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 140, 0, 35)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-Frame.Visible = false
-Frame.ZIndex = 10
-local UICorner2 = Instance.new("UICorner", Frame)
-UICorner2.CornerRadius = UDim.new(0, 6)
-local TextButton3 = Instance.new("TextButton", Frame)
-TextButton3.Size = UDim2.new(1, 0, 1, 0)
-TextButton3.BackgroundTransparency = 1
-TextButton3.Font = Enum.Font.SourceSansBold
-TextButton3.TextSize = 12
-TextButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton3.ZIndex = 11
-local Frame2 = Instance.new("Frame", ScreenGui)
-Frame2.Size = UDim2.new(0, 250, 0, 620)
-Frame2.Position = UDim2.new(0.5, -125, 0.08, 0)
-Frame2.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame2.Visible = false
-local UICorner3 = Instance.new("UICorner", Frame2)
-UICorner3.CornerRadius = UDim.new(0, 10)
-local conn6 = Frame2.InputBegan:Connect(function(p1, p2)
-	local conn7 = p1.Changed:Connect(function(p1, p2)
+end
+
+if localPlayer.Character then
+	onCharacterAdded(localPlayer.Character)
+end
+localPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+if localPlayer:FindFirstChild("Backpack") then
+	localPlayer.Backpack.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			task.spawn(function()
+				task.wait(0.05)
+				modifyBomb(child)
+			end)
+		end
 	end)
+end
+
+-- واجهة المستخدم (UI)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GoldBombGui"
+screenGui.Parent = CoreGui
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 130, 0, 40)
+toggleBtn.Position = UDim2.new(0, 20, 0, 120)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.TextSize = 14
+toggleBtn.Font = Enum.Font.SourceSansBold
+toggleBtn.Text = "قائمة Gold Bomb 💣"
+toggleBtn.Parent = screenGui
+
+local c1 = Instance.new("UICorner")
+c1.CornerRadius = UDim.new(0, 8)
+c1.Parent = toggleBtn
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 340)
+mainFrame.Position = UDim2.new(0, 20, 0, 170)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local c2 = Instance.new("UICorner")
+c2.CornerRadius = UDim.new(0, 10)
+c2.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.BackgroundTransparency = 1
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 13
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Text = "اختر صورة قنبلة Gold Prank Bomb"
+titleLabel.Parent = mainFrame
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 14
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.Text = "X"
+closeBtn.Parent = mainFrame
+
+local c3 = Instance.new("UICorner")
+c3.CornerRadius = UDim.new(0, 6)
+c3.Parent = closeBtn
+
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
 end)
-local conn8 = Frame2.InputChanged:Connect(function(p1, p2)
+
+toggleBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
 end)
-local conn9 = UserInputService.InputChanged:Connect(function(p1, p2)
-end)
-local Frame3 = Instance.new("Frame", Frame2)
-Frame3.Size = UDim2.new(0.85, 0, 0, 28)
-Frame3.Position = UDim2.new(0.075, 0, 0, 10)
-Frame3.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-local UICorner4 = Instance.new("UICorner", Frame3)
-UICorner4.CornerRadius = UDim.new(0, 6)
-local TextButton4 = Instance.new("TextButton", Frame3)
-TextButton4.Size = UDim2.new(0.2, 0, 1, 0)
-TextButton4.Position = UDim2.new(0, 0, 0, 0)
-TextButton4.BackgroundTransparency = 1
-TextButton4.Text = "◀"
-TextButton4.Font = Enum.Font.SourceSansBold
-TextButton4.TextSize = 14
-TextButton4.TextColor3 = Color3.fromRGB(255, 215, 0)
-local TextLabel3 = Instance.new("TextLabel", Frame3)
-TextLabel3.Size = UDim2.new(0.6, 0, 1, 0)
-TextLabel3.Position = UDim2.new(0.2, 0, 0, 0)
-TextLabel3.BackgroundTransparency = 1
-TextLabel3.Font = Enum.Font.SourceSansBold
-TextLabel3.TextSize = 11
-TextLabel3.TextColor3 = Color3.fromRGB(255, 255, 255)
-local TextButton5 = Instance.new("TextButton", Frame3)
-TextButton5.Size = UDim2.new(0.2, 0, 1, 0)
-TextButton5.Position = UDim2.new(0.8, 0, 0, 0)
-TextButton5.BackgroundTransparency = 1
-TextButton5.Text = "▶"
-TextButton5.Font = Enum.Font.SourceSansBold
-TextButton5.TextSize = 14
-TextButton5.TextColor3 = Color3.fromRGB(255, 215, 0)
-local TextLabel4 = Instance.new("TextLabel", Frame2)
-TextLabel4.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel4.BackgroundTransparency = 1
-TextLabel4.Font = Enum.Font.SourceSansBold
-TextLabel4.TextSize = 11
-TextLabel4.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel4.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox = Instance.new("TextBox", Frame2)
-TextBox.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox.Text = "1"
-TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox.TextColor3 = Color3.fromRGB(255, 215, 0)
-TextBox.TextSize = 12
-local UICorner5 = Instance.new("UICorner", TextBox)
-UICorner5.CornerRadius = UDim.new(0, 6)
-local TextLabel5 = Instance.new("TextLabel", Frame2)
-TextLabel5.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel5.BackgroundTransparency = 1
-TextLabel5.Font = Enum.Font.SourceSansBold
-TextLabel5.TextSize = 11
-TextLabel5.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel5.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox2 = Instance.new("TextBox", Frame2)
-TextBox2.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox2.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox2.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox2.TextSize = 12
-local UICorner6 = Instance.new("UICorner", TextBox2)
-UICorner6.CornerRadius = UDim.new(0, 6)
-local TextLabel6 = Instance.new("TextLabel", Frame2)
-TextLabel6.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel6.BackgroundTransparency = 1
-TextLabel6.Font = Enum.Font.SourceSansBold
-TextLabel6.TextSize = 11
-TextLabel6.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel6.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox3 = Instance.new("TextBox", Frame2)
-TextBox3.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox3.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox3.TextColor3 = Color3.fromRGB(255, 215, 0)
-TextBox3.TextSize = 12
-local UICorner7 = Instance.new("UICorner", TextBox3)
-UICorner7.CornerRadius = UDim.new(0, 6)
-local TextLabel7 = Instance.new("TextLabel", Frame2)
-TextLabel7.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel7.BackgroundTransparency = 1
-TextLabel7.Font = Enum.Font.SourceSansBold
-TextLabel7.TextSize = 11
-TextLabel7.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel7.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox4 = Instance.new("TextBox", Frame2)
-TextBox4.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox4.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox4.TextColor3 = Color3.fromRGB(255, 215, 0)
-TextBox4.TextSize = 12
-local UICorner8 = Instance.new("UICorner", TextBox4)
-UICorner8.CornerRadius = UDim.new(0, 6)
-local TextLabel8 = Instance.new("TextLabel", Frame2)
-TextLabel8.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel8.BackgroundTransparency = 1
-TextLabel8.Font = Enum.Font.SourceSansBold
-TextLabel8.TextSize = 11
-TextLabel8.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel8.TextXAlignment = Enum.TextXAlignment.Left
-local TextButton6 = Instance.new("TextButton", Frame2)
-TextButton6.Size = UDim2.new(0.85, 0, 0, 26)
-TextButton6.Font = Enum.Font.SourceSansBold
-TextButton6.TextSize = 11
-TextButton6.BackgroundColor3 = Color3.fromRGB(50, 90, 160)
-TextButton6.TextColor3 = Color3.fromRGB(255, 255, 255)
-local UICorner9 = Instance.new("UICorner", TextButton6)
-UICorner9.CornerRadius = UDim.new(0, 6)
-local TextLabel9 = Instance.new("TextLabel", Frame2)
-TextLabel9.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel9.BackgroundTransparency = 1
-TextLabel9.Font = Enum.Font.SourceSansBold
-TextLabel9.TextSize = 11
-TextLabel9.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel9.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox5 = Instance.new("TextBox", Frame2)
-TextBox5.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox5.Text = "5"
-TextBox5.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox5.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox5.TextSize = 12
-local UICorner10 = Instance.new("UICorner", TextBox5)
-UICorner10.CornerRadius = UDim.new(0, 6)
-local TextLabel10 = Instance.new("TextLabel", Frame2)
-TextLabel10.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel10.BackgroundTransparency = 1
-TextLabel10.Font = Enum.Font.SourceSansBold
-TextLabel10.TextSize = 11
-TextLabel10.TextColor3 = Color3.fromRGB(220, 220, 220)
-TextLabel10.TextXAlignment = Enum.TextXAlignment.Left
-local TextBox6 = Instance.new("TextBox", Frame2)
-TextBox6.Size = UDim2.new(0.85, 0, 0, 26)
-TextBox6.Text = "3"
-TextBox6.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox6.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox6.TextSize = 12
-local UICorner11 = Instance.new("UICorner", TextBox6)
-UICorner11.CornerRadius = UDim.new(0, 6)
-local TextButton7 = Instance.new("TextButton", Frame2)
-TextButton7.Size = UDim2.new(0.85, 0, 0, 26)
-TextButton7.Font = Enum.Font.SourceSansBold
-TextButton7.TextSize = 11
-TextButton7.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
-TextButton7.TextColor3 = Color3.fromRGB(255, 255, 255)
-local UICorner12 = Instance.new("UICorner", TextButton7)
-UICorner12.CornerRadius = UDim.new(0, 6)
-local TextButton8 = Instance.new("TextButton", Frame2)
-TextButton8.Size = UDim2.new(0.85, 0, 0, 26)
-TextButton8.Font = Enum.Font.SourceSansBold
-TextButton8.TextSize = 11
-TextButton8.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
-TextButton8.TextColor3 = Color3.fromRGB(255, 255, 255)
-local UICorner13 = Instance.new("UICorner", TextButton8)
-UICorner13.CornerRadius = UDim.new(0, 6)
-local TextButton9 = Instance.new("TextButton", Frame2)
-TextButton9.Size = UDim2.new(0.85, 0, 0, 26)
-TextButton9.Font = Enum.Font.SourceSansBold
-TextButton9.TextSize = 11
-TextButton9.BackgroundColor3 = Color3.fromRGB(120, 60, 180)
-TextButton9.TextColor3 = Color3.fromRGB(255, 255, 255)
-local UICorner14 = Instance.new("UICorner", TextButton9)
-UICorner14.CornerRadius = UDim.new(0, 6)
-local TextButton10 = Instance.new("TextButton", Frame2)
-TextButton10.Size = UDim2.new(0.85, 0, 0, 28)
-TextButton10.Font = Enum.Font.SourceSansBold
-TextButton10.TextSize = 11
-TextButton10.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-TextButton10.TextColor3 = Color3.fromRGB(20, 20, 20)
-local UICorner15 = Instance.new("UICorner", TextButton10)
-UICorner15.CornerRadius = UDim.new(0, 6)
-local TextButton11 = Instance.new("TextButton", Frame2)
-TextButton11.Size = UDim2.new(0.85, 0, 0, 28)
-TextButton11.Font = Enum.Font.SourceSansBold
-TextButton11.TextSize = 11
-TextButton11.BackgroundColor3 = Color3.fromRGB(230, 80, 40)
-TextButton11.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton11.Visible = false
-local UICorner16 = Instance.new("UICorner", TextButton11)
-UICorner16.CornerRadius = UDim.new(0, 6)
-local TextLabel11 = Instance.new("TextLabel", Frame2)
-TextLabel11.Size = UDim2.new(0.85, 0, 0, 16)
-TextLabel11.BackgroundTransparency = 1
-TextLabel11.Font = Enum.Font.SourceSansBold
-TextLabel11.TextSize = 11
-TextLabel11.TextColor3 = Color3.fromRGB(255, 215, 0)
-TextLabel11.TextXAlignment = Enum.TextXAlignment.Left
-local Frame4 = Instance.new("Frame", Frame2)
-Frame4.Size = UDim2.new(0.85, 0, 0, 100)
-Frame4.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-local UICorner17 = Instance.new("UICorner", Frame4)
-UICorner17.CornerRadius = UDim.new(0, 6)
-local ScrollingFrame = Instance.new("ScrollingFrame", Frame4)
-ScrollingFrame.Size = UDim2.new(1, -6, 1, -6)
-ScrollingFrame.Position = UDim2.new(0, 3, 0, 3)
-ScrollingFrame.BackgroundTransparency = 1
-ScrollingFrame.ScrollBarThickness = 3
-ScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-local TextLabel12 = Instance.new("TextLabel", ScrollingFrame)
-TextLabel12.Size = UDim2.new(1, 0, 0, 0)
-TextLabel12.BackgroundTransparency = 1
-TextLabel12.Font = Enum.Font.SourceSans
-TextLabel12.TextSize = 10
-TextLabel12.TextColor3 = Color3.fromRGB(200, 200, 200)
-TextLabel12.TextWrapped = true
-TextLabel12.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel12.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel12.AutomaticSize = Enum.AutomaticSize.Y
-local Frame5 = Instance.new("Frame", ScreenGui)
-Frame5.Size = UDim2.new(0, 200, 0, 130)
-Frame5.Position = UDim2.new(0.5, 140, 0.35, 0)
-Frame5.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-Frame5.Visible = true
-Frame5.ZIndex = 20
-local UICorner18 = Instance.new("UICorner", Frame5)
-UICorner18.CornerRadius = UDim.new(0, 8)
-local conn10 = Frame5.InputBegan:Connect(function(p1, p2)
-	local conn11 = p1.Changed:Connect(function(p1, p2)
-	end)
-end)
-local conn12 = Frame5.InputChanged:Connect(function(p1, p2)
-end)
-local conn13 = UserInputService.InputChanged:Connect(function(p1, p2)
-end)
-local TextLabel13 = Instance.new("TextLabel", Frame5)
-TextLabel13.Size = UDim2.new(1, -25, 0, 25)
-TextLabel13.Position = UDim2.new(0, 8, 0, 2)
-TextLabel13.BackgroundTransparency = 1
-TextLabel13.Font = Enum.Font.SourceSansBold
-TextLabel13.TextSize = 12
-TextLabel13.TextColor3 = Color3.fromRGB(255, 215, 0)
-TextLabel13.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel13.ZIndex = 21
-local TextButton12 = Instance.new("TextButton", Frame5)
-TextButton12.Size = UDim2.new(0, 20, 0, 20)
-TextButton12.Position = UDim2.new(1, -22, 0, 4)
-TextButton12.BackgroundTransparency = 1
-TextButton12.Text = "✕"
-TextButton12.Font = Enum.Font.SourceSansBold
-TextButton12.TextSize = 14
-TextButton12.TextColor3 = Color3.fromRGB(220, 60, 60)
-TextButton12.ZIndex = 21
-local TextLabel14 = Instance.new("TextLabel", Frame5)
-TextLabel14.Size = UDim2.new(1, 0, 0, 25)
-TextLabel14.Position = UDim2.new(0, 0, 0, 32)
-TextLabel14.BackgroundTransparency = 1
-TextLabel14.Font = Enum.Font.SourceSansBold
-TextLabel14.TextSize = 13
-TextLabel14.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel14.ZIndex = 21
-local TextButton13 = Instance.new("TextButton", Frame5)
-TextButton13.Size = UDim2.new(0, 45, 0, 30)
-TextButton13.Position = UDim2.new(0.08, 0, 0, 65)
-TextButton13.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
-TextButton13.Text = "➖"
-TextButton13.Font = Enum.Font.SourceSansBold
-TextButton13.TextSize = 12
-TextButton13.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton13.ZIndex = 21
-local UICorner19 = Instance.new("UICorner", TextButton13)
-UICorner19.CornerRadius = UDim.new(0, 6)
-local TextButton14 = Instance.new("TextButton", Frame5)
-TextButton14.Size = UDim2.new(0, 65, 0, 30)
-TextButton14.Position = UDim2.new(0.34, 0, 0, 65)
-TextButton14.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
-TextButton14.Text = "Reset 100%"
-TextButton14.Font = Enum.Font.SourceSansBold
-TextButton14.TextSize = 10
-TextButton14.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton14.ZIndex = 21
-local UICorner20 = Instance.new("UICorner", TextButton14)
-UICorner20.CornerRadius = UDim.new(0, 6)
-local TextButton15 = Instance.new("TextButton", Frame5)
-TextButton15.Size = UDim2.new(0, 45, 0, 30)
-TextButton15.Position = UDim2.new(0.7, 0, 0, 65)
-TextButton15.BackgroundColor3 = Color3.fromRGB(60, 160, 80)
-TextButton15.Text = "➕"
-TextButton15.Font = Enum.Font.SourceSansBold
-TextButton15.TextSize = 12
-TextButton15.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextButton15.ZIndex = 21
-local UICorner21 = Instance.new("UICorner", TextButton15)
-UICorner21.CornerRadius = UDim.new(0, 6)
-local conn14 = TextButton13.MouseButton1Click:Connect(function(p1, p2)
-	UIScale.Scale = math.clamp(((math.min((workspace.CurrentCamera.ViewportSize.X / Vector2.new(1920, 1080).X), (workspace.CurrentCamera.ViewportSize.Y / Vector2.new(1920, 1080).Y)) * 1.35) * 0.9), 0.4, 3)
-	TextLabel14.Text = "Tỷ lệ Size: 90%"
-	local v2 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = 2,
-				Slot = 1,
-				SpawnMode = 1,
-				ThrowDelay = 0.05
-			}
-		},
-		CustomScale = 0.9,
-		DespawnTime = 5,
-		Language = "VI",
-		MaxBombs = 3,
-		TotalBombs = 1,
-		UnlimitedBombs = false
-	})
-	writefile("C4_Menu_Config.json", "{\"BombsData\":[{\"SpawnMode\":1,\"ThrowDelay\":0.05,\"Cooldown\":2,\"Slot\":1}],\"DespawnTime\":5,\"TotalBombs\":1,\"CustomScale\":0.9,\"UnlimitedBombs\":false,\"MaxBombs\":3,\"Language\":\"VI\"}")
-end)
-local conn15 = TextButton15.MouseButton1Click:Connect(function(p1, p2)
-	UIScale.Scale = math.clamp(((math.min((workspace.CurrentCamera.ViewportSize.X / Vector2.new(1920, 1080).X), (workspace.CurrentCamera.ViewportSize.Y / Vector2.new(1920, 1080).Y)) * 1.35) * 1), 0.4, 3)
-	TextLabel14.Text = "Tỷ lệ Size: 100%"
-	local v3 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = 2,
-				Slot = 1,
-				SpawnMode = 1,
-				ThrowDelay = 0.05
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = 5,
-		Language = "VI",
-		MaxBombs = 3,
-		TotalBombs = 1,
-		UnlimitedBombs = false
-	})
-	writefile("C4_Menu_Config.json", "{\"BombsData\":[{\"SpawnMode\":1,\"ThrowDelay\":0.05,\"Cooldown\":2,\"Slot\":1}],\"DespawnTime\":5,\"TotalBombs\":1,\"CustomScale\":1,\"UnlimitedBombs\":false,\"MaxBombs\":3,\"Language\":\"VI\"}")
-end)
-local conn16 = TextButton14.MouseButton1Click:Connect(function(p1, p2)
-	UIScale.Scale = math.clamp(((math.min((workspace.CurrentCamera.ViewportSize.X / Vector2.new(1920, 1080).X), (workspace.CurrentCamera.ViewportSize.Y / Vector2.new(1920, 1080).Y)) * 1.35) * 1), 0.4, 3)
-	TextLabel14.Text = "Tỷ lệ Size: 100%"
-	local v4 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = 2,
-				Slot = 1,
-				SpawnMode = 1,
-				ThrowDelay = 0.05
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = 5,
-		Language = "VI",
-		MaxBombs = 3,
-		TotalBombs = 1,
-		UnlimitedBombs = false
-	})
-	writefile("C4_Menu_Config.json", "{\"BombsData\":[{\"SpawnMode\":1,\"ThrowDelay\":0.05,\"Cooldown\":2,\"Slot\":1}],\"DespawnTime\":5,\"TotalBombs\":1,\"CustomScale\":1,\"UnlimitedBombs\":false,\"MaxBombs\":3,\"Language\":\"VI\"}")
-end)
-local conn17 = TextButton9.MouseButton1Click:Connect(function(p1, p2)
-	Frame5.Visible = false
-end)
-local conn18 = TextButton12.MouseButton1Click:Connect(function(p1, p2)
-	Frame5.Visible = false
-end)
-local conn19 = TextButton6.MouseButton1Click:Connect(function(p1, p2)
-	TextLabel.Text = "MENU C4"
-	TextLabel2.Text = "Make by idcu (ilovebandngot)"
-	TextLabel4.Text = "🎒 Số Gold Bomb trg kho đồ:"
-	TextLabel5.Text = "⏱️ Hồi chiêu Bom #1 (giây):"
-	TextLabel6.Text = "🎒 Vị trí Thứ Tự Balo (Ưu tiên):"
-	TextLabel7.Text = "⏳ Delay ném Bom #1 (giây):"
-	TextLabel8.Text = "🎯 Vị trí xuất hiện Bom #1:"
-	TextLabel9.Text = "⏳ Thời gian tự xóa bom (giây):"
-	TextLabel10.Text = "🔢 Số bom tối đa dưới đất:"
-	TextButton10.Text = "💾 LƯU TRANG NÀY"
-	TextButton11.Text = "🔥 LƯU TẤT CẢ TRANG"
-	TextButton8.Text = "🌐 Ngôn ngữ: Tiếng Việt"
-	TextButton9.Text = "📐 CHỈNH SIZE MENU"
-	TextLabel13.Text = "📐 CHỈNH KÍCH THƯỚC MENU"
-	TextLabel14.Text = "Tỷ lệ Size: 100%"
-	TextButton3.Text = "👁️ Ẩn nút MENU"
-	TextLabel11.Text = "📖 HƯỚNG DẪN SỬ DỤNG"
-	TextLabel12.Text = "1️⃣ CÀI ĐẶT TRANG 1:\n• Cài đặt chung: Số lượng bom, thời gian xóa & số bom tối đa.\n\n2️⃣ VỊ TRÍ & DELAY:\n• Đổi vị trí xuất hiện & độ trễ ném.\n\n3️⃣ CHỈNH SIZE & LƯU:\n• Mở bảng Chỉnh Size để phóng to/thu nhỏ UI.\n• Cài đặt sẽ tự động lưu vào Workspace!"
-	TextLabel3.Text = "📄 TRANG 1 / 1 (BOM #1)"
-	TextBox2.Text = "2"
-	TextBox3.Text = "1"
-	TextBox4.Text = "0.05"
-	TextButton6.Text = "🦶 Trước chân"
-	TextBox.Text = "1"
-	TextBox5.Text = "5"
-	TextBox6.Text = "3"
-	TextButton11.Visible = false
-	TextLabel4.Visible = true
-	TextBox.Visible = true
-	TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-	TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-	TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-	TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-	TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-	TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-	TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-	TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-	TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-	TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-	TextLabel9.Visible = true
-	TextBox5.Visible = true
-	TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-	TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-	TextButton7.Text = "📁 Chế độ: Giới hạn"
-	TextButton7.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
-	TextLabel10.Visible = true
-	TextBox6.Visible = true
-	TextLabel10.Position = UDim2.new(0.075, 0, 0, 334)
-	TextBox6.Position = UDim2.new(0.075, 0, 0, 352)
-	TextButton7.Position = UDim2.new(0.075, 0, 0, 382)
-	TextButton8.Position = UDim2.new(0.075, 0, 0, 414)
-	TextButton9.Position = UDim2.new(0.075, 0, 0, 446)
-	TextButton10.Position = UDim2.new(0.075, 0, 0, 478)
-	TextButton11.Visible = false
-	TextLabel11.Position = UDim2.new(0.075, 0, 0, 512)
-	Frame4.Position = UDim2.new(0.075, 0, 0, 530)
-	Frame2.Size = UDim2.new(0, 250, 0, 637)
-end)
-local conn20 = TextButton4.MouseButton1Click:Connect(function(p1, p2)
-	local v5 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = tonumber(TextBox2.Text),
-				Slot = tonumber(TextBox3.Text),
-				SpawnMode = 2,
-				ThrowDelay = tonumber(TextBox4.Text)
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = tonumber(TextBox5.Text),
-		Language = "VI",
-		MaxBombs = tonumber(TextBox6.Text),
-		TotalBombs = 1,
-		UnlimitedBombs = false
-	})
-	writefile("C4_Menu_Config.json", v5)
-end)
-local conn21 = TextButton5.MouseButton1Click:Connect(function(p1, p2)
-	local v6 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = tonumber(TextBox2.Text),
-				Slot = tonumber(TextBox3.Text),
-				SpawnMode = 2,
-				ThrowDelay = tonumber(TextBox4.Text)
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = tonumber(TextBox5.Text),
-		Language = "VI",
-		MaxBombs = tonumber(TextBox6.Text),
-		TotalBombs = 1,
-		UnlimitedBombs = false
-	})
-	writefile("C4_Menu_Config.json", v6)
-end)
-local conn22 = TextButton7.MouseButton1Click:Connect(function(p1, p2)
-	TextLabel.Text = "MENU C4"
-	TextLabel2.Text = "Make by idcu (ilovebandngot)"
-	TextLabel4.Text = "🎒 Số Gold Bomb trg kho đồ:"
-	TextLabel5.Text = "⏱️ Hồi chiêu Bom #1 (giây):"
-	TextLabel6.Text = "🎒 Vị trí Thứ Tự Balo (Ưu tiên):"
-	TextLabel7.Text = "⏳ Delay ném Bom #1 (giây):"
-	TextLabel8.Text = "🎯 Vị trí xuất hiện Bom #1:"
-	TextLabel9.Text = "⏳ Thời gian tự xóa bom (giây):"
-	TextLabel10.Text = "🔢 Số bom tối đa dưới đất:"
-	TextButton10.Text = "💾 LƯU TRANG NÀY"
-	TextButton11.Text = "🔥 LƯU TẤT CẢ TRANG"
-	TextButton8.Text = "🌐 Ngôn ngữ: Tiếng Việt"
-	TextButton9.Text = "📐 CHỈNH SIZE MENU"
-	TextLabel13.Text = "📐 CHỈNH KÍCH THƯỚC MENU"
-	TextLabel14.Text = "Tỷ lệ Size: 100%"
-	TextButton3.Text = "👁️ Ẩn nút MENU"
-	TextLabel11.Text = "📖 HƯỚNG DẪN SỬ DỤNG"
-	TextLabel12.Text = "1️⃣ CÀI ĐẶT TRANG 1:\n• Cài đặt chung: Số lượng bom, thời gian xóa & số bom tối đa.\n\n2️⃣ VỊ TRÍ & DELAY:\n• Đổi vị trí xuất hiện & độ trễ ném.\n\n3️⃣ CHỈNH SIZE & LƯU:\n• Mở bảng Chỉnh Size để phóng to/thu nhỏ UI.\n• Cài đặt sẽ tự động lưu vào Workspace!"
-	TextLabel3.Text = "📄 TRANG 1 / 1 (BOM #1)"
-	TextBox2.Text = tostring(tonumber(TextBox2.Text))
-	TextBox3.Text = tostring(tonumber(TextBox3.Text))
-	TextBox4.Text = tostring(tonumber(TextBox4.Text))
-	TextButton6.Text = "🦶 Trước chân"
-	TextBox.Text = "1"
-	TextBox5.Text = tostring(tonumber(TextBox5.Text))
-	TextBox6.Text = tostring(tonumber(TextBox6.Text))
-	TextButton11.Visible = false
-	TextLabel4.Visible = true
-	TextBox.Visible = true
-	TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-	TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-	TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-	TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-	TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-	TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-	TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-	TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-	TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-	TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-	TextLabel9.Visible = true
-	TextBox5.Visible = true
-	TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-	TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-	TextButton7.Text = "♾️ Chế độ: Không giới hạn"
-	TextButton7.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-	TextLabel10.Visible = false
-	TextBox6.Visible = false
-	TextButton7.Position = UDim2.new(0.075, 0, 0, 334)
-	TextButton8.Position = UDim2.new(0.075, 0, 0, 366)
-	TextButton9.Position = UDim2.new(0.075, 0, 0, 398)
-	TextButton10.Position = UDim2.new(0.075, 0, 0, 430)
-	TextButton11.Visible = false
-	TextLabel11.Position = UDim2.new(0.075, 0, 0, 464)
-	Frame4.Position = UDim2.new(0.075, 0, 0, 482)
-	Frame2.Size = UDim2.new(0, 250, 0, 589)
-end)
-local conn23 = TextButton8.MouseButton1Click:Connect(function(p1, p2)
-	local v7 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = tonumber(TextBox2.Text),
-				Slot = tonumber(TextBox3.Text),
-				SpawnMode = 2,
-				ThrowDelay = tonumber(TextBox4.Text)
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = tonumber(TextBox5.Text),
-		Language = "EN",
-		MaxBombs = tonumber(TextBox6.Text),
-		TotalBombs = 1,
-		UnlimitedBombs = true
-	})
-	writefile("C4_Menu_Config.json", v7)
-	TextLabel.Text = "C4 MENU"
-	TextLabel2.Text = "Make by idcu (ilovebandngot)"
-	TextLabel4.Text = "🎒 Gold Bombs in Inventory:"
-	TextLabel5.Text = "⏱️ Bomb #1 Cooldown (sec):"
-	TextLabel6.Text = "🎒 Backpack Priority Order:"
-	TextLabel7.Text = "⏳ Bomb #1 Throw Delay (sec):"
-	TextLabel8.Text = "🎯 Bomb #1 Spawn Position:"
-	TextLabel9.Text = "⏳ Ground Despawn Time (sec):"
-	TextLabel10.Text = "🔢 Max bombs on ground:"
-	TextButton10.Text = "💾 SAVE THIS PAGE"
-	TextButton11.Text = "🔥 SAVE ALL PAGES"
-	TextButton8.Text = "🌐 Language: English"
-	TextButton9.Text = "📐 RESIZE MENU"
-	TextLabel13.Text = "📐 MENU RESIZE PANEL"
-	TextLabel14.Text = "Menu Scale: 100%"
-	TextButton3.Text = "👁️ Hide MENU button"
-	TextLabel11.Text = "📖 HOW TO USE"
-	TextLabel12.Text = "1️⃣ PAGE 1 SETTINGS:\n• Global settings: Total bombs, despawn time, max bombs on ground.\n\n2️⃣ POSITION & DELAY:\n• Change spawn position & throw delay.\n\n3️⃣ RESIZE & SAVE:\n• Open Resize Panel to scale the UI.\n• Settings auto-save to Workspace!"
-	TextLabel3.Text = "📄 PAGE 1 / 1 (BOMB #1)"
-	TextBox2.Text = tostring(tonumber(TextBox2.Text))
-	TextBox3.Text = tostring(tonumber(TextBox3.Text))
-	TextBox4.Text = tostring(tonumber(TextBox4.Text))
-	TextButton6.Text = "🦶 Front Feet"
-	TextBox.Text = "1"
-	TextBox5.Text = tostring(tonumber(TextBox5.Text))
-	TextBox6.Text = tostring(tonumber(TextBox6.Text))
-	TextButton11.Visible = false
-	TextLabel4.Visible = true
-	TextBox.Visible = true
-	TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-	TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-	TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-	TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-	TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-	TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-	TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-	TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-	TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-	TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-	TextLabel9.Visible = true
-	TextBox5.Visible = true
-	TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-	TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-	TextButton7.Text = "♾️ Mode: Unlimited"
-	TextButton7.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-	TextLabel10.Visible = false
-	TextBox6.Visible = false
-	TextButton7.Position = UDim2.new(0.075, 0, 0, 334)
-	TextButton8.Position = UDim2.new(0.075, 0, 0, 366)
-	TextButton9.Position = UDim2.new(0.075, 0, 0, 398)
-	TextButton10.Position = UDim2.new(0.075, 0, 0, 430)
-	TextButton11.Visible = false
-	TextLabel11.Position = UDim2.new(0.075, 0, 0, 464)
-	Frame4.Position = UDim2.new(0.075, 0, 0, 482)
-	Frame2.Size = UDim2.new(0, 250, 0, 589)
-end)
-local conn24 = TextButton2.MouseButton1Down:Connect(function(p1, p2)
-	task.delay(0.5, function(p1, p2)
-		Frame.Position = UDim2.new(0, TextButton2.AbsolutePosition.X, 0, (TextButton2.AbsolutePosition.Y - 40))
-		Frame.Visible = true
-	end)
-end)
-local conn25 = TextButton2.MouseButton1Up:Connect(function(p1, p2)
-end)
-local conn26 = TextButton2.MouseLeave:Connect(function(p1, p2)
-end)
-local conn27 = TextButton2.MouseButton1Click:Connect(function(p1, p2)
-end)
-local conn28 = TextButton3.MouseButton1Click:Connect(function(p1, p2)
-	Frame.Visible = false
-	TextButton2.BackgroundTransparency = 0.98
-	TextLabel.TextTransparency = 0.98
-	TextLabel2.TextTransparency = 0.98
-	TextButton.Visible = true
-	TextLabel.Text = "C4 MENU"
-	TextLabel2.Text = "Make by idcu (ilovebandngot)"
-	TextLabel4.Text = "🎒 Gold Bombs in Inventory:"
-	TextLabel5.Text = "⏱️ Bomb #1 Cooldown (sec):"
-	TextLabel6.Text = "🎒 Backpack Priority Order:"
-	TextLabel7.Text = "⏳ Bomb #1 Throw Delay (sec):"
-	TextLabel8.Text = "🎯 Bomb #1 Spawn Position:"
-	TextLabel9.Text = "⏳ Ground Despawn Time (sec):"
-	TextLabel10.Text = "🔢 Max bombs on ground:"
-	TextButton10.Text = "💾 SAVE THIS PAGE"
-	TextButton11.Text = "🔥 SAVE ALL PAGES"
-	TextButton8.Text = "🌐 Language: English"
-	TextButton9.Text = "📐 RESIZE MENU"
-	TextLabel13.Text = "📐 MENU RESIZE PANEL"
-	TextLabel14.Text = "Menu Scale: 100%"
-	TextButton3.Text = "👁️ Unhide MENU button"
-	TextLabel11.Text = "📖 HOW TO USE"
-	TextLabel12.Text = "1️⃣ PAGE 1 SETTINGS:\n• Global settings: Total bombs, despawn time, max bombs on ground.\n\n2️⃣ POSITION & DELAY:\n• Change spawn position & throw delay.\n\n3️⃣ RESIZE & SAVE:\n• Open Resize Panel to scale the UI.\n• Settings auto-save to Workspace!"
-	TextLabel3.Text = "📄 PAGE 1 / 1 (BOMB #1)"
-	TextBox2.Text = tostring(tonumber(TextBox2.Text))
-	TextBox3.Text = tostring(tonumber(TextBox3.Text))
-	TextBox4.Text = tostring(tonumber(TextBox4.Text))
-	TextButton6.Text = "🦶 Front Feet"
-	TextBox.Text = "1"
-	TextBox5.Text = tostring(tonumber(TextBox5.Text))
-	TextBox6.Text = tostring(tonumber(TextBox6.Text))
-	TextButton11.Visible = false
-	TextLabel4.Visible = true
-	TextBox.Visible = true
-	TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-	TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-	TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-	TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-	TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-	TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-	TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-	TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-	TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-	TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-	TextLabel9.Visible = true
-	TextBox5.Visible = true
-	TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-	TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-	TextButton7.Text = "♾️ Mode: Unlimited"
-	TextButton7.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-	TextLabel10.Visible = false
-	TextBox6.Visible = false
-	TextButton7.Position = UDim2.new(0.075, 0, 0, 334)
-	TextButton8.Position = UDim2.new(0.075, 0, 0, 366)
-	TextButton9.Position = UDim2.new(0.075, 0, 0, 398)
-	TextButton10.Position = UDim2.new(0.075, 0, 0, 430)
-	TextButton11.Visible = false
-	TextLabel11.Position = UDim2.new(0.075, 0, 0, 464)
-	Frame4.Position = UDim2.new(0.075, 0, 0, 482)
-	Frame2.Size = UDim2.new(0, 250, 0, 589)
-end)
-local conn29 = TextButton.MouseButton1Click:Connect(function(p1, p2)
-	TextButton2.BackgroundTransparency = 0
-	TextLabel.TextTransparency = 0
-	TextLabel2.TextTransparency = 0
-	TextButton.Visible = false
-	TextLabel.Text = "C4 MENU"
-	TextLabel2.Text = "Make by idcu (ilovebandngot)"
-	TextLabel4.Text = "🎒 Gold Bombs in Inventory:"
-	TextLabel5.Text = "⏱️ Bomb #1 Cooldown (sec):"
-	TextLabel6.Text = "🎒 Backpack Priority Order:"
-	TextLabel7.Text = "⏳ Bomb #1 Throw Delay (sec):"
-	TextLabel8.Text = "🎯 Bomb #1 Spawn Position:"
-	TextLabel9.Text = "⏳ Ground Despawn Time (sec):"
-	TextLabel10.Text = "🔢 Max bombs on ground:"
-	TextButton10.Text = "💾 SAVE THIS PAGE"
-	TextButton11.Text = "🔥 SAVE ALL PAGES"
-	TextButton8.Text = "🌐 Language: English"
-	TextButton9.Text = "📐 RESIZE MENU"
-	TextLabel13.Text = "📐 MENU RESIZE PANEL"
-	TextLabel14.Text = "Menu Scale: 100%"
-	TextButton3.Text = "👁️ Hide MENU button"
-	TextLabel11.Text = "📖 HOW TO USE"
-	TextLabel12.Text = "1️⃣ PAGE 1 SETTINGS:\n• Global settings: Total bombs, despawn time, max bombs on ground.\n\n2️⃣ POSITION & DELAY:\n• Change spawn position & throw delay.\n\n3️⃣ RESIZE & SAVE:\n• Open Resize Panel to scale the UI.\n• Settings auto-save to Workspace!"
-	TextLabel3.Text = "📄 PAGE 1 / 1 (BOMB #1)"
-	TextBox2.Text = tostring(tonumber(TextBox2.Text))
-	TextBox3.Text = tostring(tonumber(TextBox3.Text))
-	TextBox4.Text = tostring(tonumber(TextBox4.Text))
-	TextButton6.Text = "🦶 Front Feet"
-	TextBox.Text = "1"
-	TextBox5.Text = tostring(tonumber(TextBox5.Text))
-	TextBox6.Text = tostring(tonumber(TextBox6.Text))
-	TextButton11.Visible = false
-	TextLabel4.Visible = true
-	TextBox.Visible = true
-	TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-	TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-	TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-	TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-	TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-	TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-	TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-	TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-	TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-	TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-	TextLabel9.Visible = true
-	TextBox5.Visible = true
-	TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-	TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-	TextButton7.Text = "♾️ Mode: Unlimited"
-	TextButton7.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-	TextLabel10.Visible = false
-	TextBox6.Visible = false
-	TextButton7.Position = UDim2.new(0.075, 0, 0, 334)
-	TextButton8.Position = UDim2.new(0.075, 0, 0, 366)
-	TextButton9.Position = UDim2.new(0.075, 0, 0, 398)
-	TextButton10.Position = UDim2.new(0.075, 0, 0, 430)
-	TextButton11.Visible = false
-	TextLabel11.Position = UDim2.new(0.075, 0, 0, 464)
-	Frame4.Position = UDim2.new(0.075, 0, 0, 482)
-	Frame2.Size = UDim2.new(0, 250, 0, 589)
-end)
-local conn30 = TextButton10.MouseButton1Click:Connect(function(p1, p2)
-	local v8 = HttpService:JSONEncode({
-		BombsData = {
-			{
-				Cooldown = tonumber(TextBox2.Text),
-				Slot = tonumber(TextBox3.Text),
-				SpawnMode = 2,
-				ThrowDelay = tonumber(TextBox4.Text)
-			}
-		},
-		CustomScale = 1,
-		DespawnTime = tonumber(TextBox5.Text),
-		Language = "EN",
-		MaxBombs = tonumber(TextBox6.Text),
-		TotalBombs = 1,
-		UnlimitedBombs = true
-	})
-	writefile("C4_Menu_Config.json", v8)
-	-- trace stopped: target:1: envlog: time limit exceeded
-end)
-local conn31 = TextButton11.MouseButton1Click:Connect(function(p1, p2)
-	-- trace stopped: target:1: envlog: time limit exceeded
-end)
-local conn32 = game.Players.LocalPlayer.CharacterAdded:Connect(function(p1, p2)
-	local Backpack = game.Players.LocalPlayer:FindFirstChild("Backpack")
-	local Children = Backpack:GetChildren()
-	local v9 = Children[1]:IsA("Tool")
-	local Children2 = game.Players.LocalPlayer.Character:GetChildren()
-	local v10 = Children2[1]:IsA("Tool")
-	-- trace stopped: target:1: envlog: time limit exceeded
-end)
-TextLabel.Text = "C4 MENU"
-TextLabel2.Text = "Make by idcu (ilovebandngot)"
-TextLabel4.Text = "🎒 Gold Bombs in Inventory:"
-TextLabel5.Text = "⏱️ Bomb #1 Cooldown (sec):"
-TextLabel6.Text = "🎒 Backpack Priority Order:"
-TextLabel7.Text = "⏳ Bomb #1 Throw Delay (sec):"
-TextLabel8.Text = "🎯 Bomb #1 Spawn Position:"
-TextLabel9.Text = "⏳ Ground Despawn Time (sec):"
-TextLabel10.Text = "🔢 Max bombs on ground:"
-TextButton10.Text = "💾 SAVE THIS PAGE"
-TextButton11.Text = "🔥 SAVE ALL PAGES"
-TextButton8.Text = "🌐 Language: English"
-TextButton9.Text = "📐 RESIZE MENU"
-TextLabel13.Text = "📐 MENU RESIZE PANEL"
-TextLabel14.Text = "Menu Scale: 100%"
-TextButton3.Text = "👁️ Hide MENU button"
-TextLabel11.Text = "📖 HOW TO USE"
-TextLabel12.Text = "1️⃣ PAGE 1 SETTINGS:\n• Global settings: Total bombs, despawn time, max bombs on ground.\n\n2️⃣ POSITION & DELAY:\n• Change spawn position & throw delay.\n\n3️⃣ RESIZE & SAVE:\n• Open Resize Panel to scale the UI.\n• Settings auto-save to Workspace!"
-TextLabel3.Text = string.format("📄 PAGE %d / %d (BOMB #%d)", 1, math.clamp(math.clamp(tonumber(TextBox.Text), 1, 30), 1, 30), 1)
-TextBox2.Text = tostring(tonumber(TextBox2.Text))
-TextBox3.Text = tostring(tonumber(TextBox3.Text))
-TextBox4.Text = tostring(tonumber(TextBox4.Text))
-TextButton6.Text = "🦶 Front Feet"
-TextBox.Text = tostring(math.clamp(math.clamp(tonumber(TextBox.Text), 1, 30), 1, 30))
-TextBox5.Text = tostring(tonumber(TextBox5.Text))
-TextBox6.Text = tostring(tonumber(TextBox6.Text))
-TextButton11.Visible = false
-TextLabel4.Visible = true
-TextBox.Visible = true
-TextLabel4.Position = UDim2.new(0.075, 0, 0, 46)
-TextBox.Position = UDim2.new(0.075, 0, 0, 64)
-TextLabel5.Position = UDim2.new(0.075, 0, 0, 94)
-TextBox2.Position = UDim2.new(0.075, 0, 0, 112)
-TextLabel6.Position = UDim2.new(0.075, 0, 0, 142)
-TextBox3.Position = UDim2.new(0.075, 0, 0, 160)
-TextLabel7.Position = UDim2.new(0.075, 0, 0, 190)
-TextBox4.Position = UDim2.new(0.075, 0, 0, 208)
-TextLabel8.Position = UDim2.new(0.075, 0, 0, 238)
-TextButton6.Position = UDim2.new(0.075, 0, 0, 256)
-TextLabel9.Visible = true
-TextBox5.Visible = true
-TextLabel9.Position = UDim2.new(0.075, 0, 0, 286)
-TextBox5.Position = UDim2.new(0.075, 0, 0, 304)
-TextButton7.Text = "♾️ Mode: Unlimited"
-TextButton7.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-TextLabel10.Visible = false
-TextBox6.Visible = false
-TextButton7.Position = UDim2.new(0.075, 0, 0, 334)
-TextButton8.Position = UDim2.new(0.075, 0, 0, 366)
-TextButton9.Position = UDim2.new(0.075, 0, 0, 398)
-TextButton10.Position = UDim2.new(0.075, 0, 0, 430)
-TextButton11.Visible = false
-TextLabel11.Position = UDim2.new(0.075, 0, 0, 464)
-Frame4.Position = UDim2.new(0.075, 0, 0, 482)
-Frame2.Size = UDim2.new(0, 250, 0, 589)
-task.spawn(function(p1, p2)
-	local Backpack2 = game.Players.LocalPlayer:FindFirstChild("Backpack")
-	local Children3 = Backpack2:GetChildren()
-	local v11 = Children3[1]:IsA("Tool")
-	local Children4 = game.Players.LocalPlayer.Character:GetChildren()
-	local v12 = Children4[1]:IsA("Tool")
-	-- trace stopped: target:1: envlog: time limit exceeded
-end)
+
+-- إنشاء الأزرار للـ IDs الستة
+for i, idAsset in ipairs(bombIds) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, 45 + (i * 42))
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = "صورة ID " .. i
+    btn.Parent = mainFrame
+    
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        currentTexture = idAsset
+        
+        if selectedButton then
+            selectedButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+        selectedButton = btn
+        btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        
+        -- تطبيق فوري على الأداة الحالية في اليد
+        if localPlayer.Character then
+            for _, item in ipairs(localPlayer.Character:GetChildren()) do
+                if item:IsA("Tool") then modifyBomb(item) end
+            end
+        end
+        
+        print("تم تغيير وتثبيت الصورة: " .. idAsset)
+    end)
+end
+
+print("تم تفعيل السكريبت المحدث بنجاح!")
